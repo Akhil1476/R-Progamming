@@ -6,7 +6,7 @@
 - 😄 Pronouns: ...
 - ⚡ Fun fact: ...
 # Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: AKHIL AKKENAPALLY
 
 on:
   # Runs on pushes targeting the default branch
