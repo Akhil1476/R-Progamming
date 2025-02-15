@@ -1,0 +1,149 @@
+
+#Installing the packages
+install.packages('ggplot2', repos = "http://cran.us.r-project.org")
+install.packages('tidyverse' , repos = "http://cran.us.r-project.org")
+install.packages('tidyr', repos = "http://cran.us.r-project.org")
+
+
+#loading the Libraries
+library(ggplot2)
+library(tidyverse)
+library(tidyr)
+
+# At least 5K rows or more. Can consist of multiple files, that you may need to join.
+#loading the csv file
+titanic <- read_csv("Titanic.csv")
+
+# to understand the structure
+str(titanic)
+
+# Have data issues that you will be fixing.  
+#converting the variables 
+titanic$Name <- as.character(titanic$Name)
+titanic$PClass <- as.factor(titanic$PClass)
+titanic$Survived <- as.factor(titanic$Survived)
+
+#To get brief idea on the data variables
+summary(titanic)
+
+#separating the titles from the names and pushing then into new column 'Title'
+titanic$Title <- sapply(titanic$Name, FUN=function(x) {regmatches(x,regexec(',[[:space:]](.*?)[[:space:]]',x))[[1]][2]})
+
+#retrieving the title list to analyse the data
+unique(titanic$Title)
+
+#to extract the rows with NA
+titanic_na <- titanic[rowSums(is.na(titanic)) > 0, ] 
+titanic_na$Title <- gsub(".*, ","", titanic_na$Name)
+
+#it is a new dataframe where most of the NA's are fixed.
+titanic_new <- rbind(titanic, titanic_na)
+
+#Observation: Apart from regular titles, some of the middle names are retrieved. 
+#To identify gender, I have checked the names of the odd titles and to rectify them, I mapped their gender correctly.
+#One Exceptional case is "Leader, Dr Alice Farnham" is Female but it came under Male category as we consider Dr as Male. 
+#Male = Mr, Master, Colonel, Dr, Major, William, Simon, Captain, Col, Nikolai, Richard, Albert, Eino, Nils, Oscar, Thomas, Ernst, Rev, Jonkheer, SirDelia, Sander, Mansouer, Khalil, Leo 
+#Female = Miss,Ms ,Ms, Madame, ,Mrs, Jenny, Hilda, Mlle, the, Lady
+
+
+#Mapping the Gender
+mapgender <- c('Miss'= 'Female','Ms'='Female','Ms '='Female', 'Madame'='Female', 'Mrs'='Female', 'Jenny'='Female',
+               'Hilda'='Female','the'='Female','Mlle'='Female','Lady'='Female','Mr'='Male','Master'='Male','Colonel'='Male',
+               'Dr'='Male', 'Major'='Male','William'='Male','Simon'='Male','Captain'='Male','Col'='Male','Nikolai'='Male',
+               'Richard'='Male','Albert'='Male','Eino'='Male','Nils'='Male','Oscar'='Male','Thomas'='Male','Ernst'='Male',
+               'Rev'='Male','Jonkheer'='Male','Sir'='Male','Delia'='Male','Sander'='Male','Mansouer'='Male','Khalil'='Male',
+               'Leo'='Male')
+
+#inserting the gender to the new column gender
+titanic_new$Gender <- as.factor(mapgender[titanic_new$Title])
+
+#analyzing the data to prepare it for Marital Status
+filter(titanic_new, titanic_new$Title !="Mrs", titanic_new$Gender == "Female")
+#other than Miss; Lady, Madame, titles were odd in the above set
+
+#understood that Madame, Lady are also the titles for married women 
+filter(titanic_new, titanic_new$Title =="Lady")
+filter(titanic_new, titanic_new$Title =="the")
+
+#mapping the Marital Status for female
+mapMaritalFemale <- c('Miss' = 'Unmarried', 'Ms' = 'Unmarried','Ms ' = 'Unmarried', 'Mrs' = 'Married', 'Madame' = 'Married',
+                'Lady' = 'Married', 'the' = 'Married')
+
+#inserting the Marital Status 
+titanic_new$Marital_status <- as.factor(mapMaritalFemale[titanic_new$Title])
+
+#final validation
+str(titanic_new)
+summary(titanic_new)
+```
+
+Using ggplot2, create appropriate plots to answer the following questions:
+
+#relationship between survival and gender?
+
+#to add Titles to the strips
+S.labs <- c('0' = "Died", '1' = "Survied")
+
+#Plotting the bar graph using ggplot
+#Dropped the NA values
+#Used coord_flip for better comparison and Visualization 
+titanic_new %>% drop_na(Gender,Survived) %>% ggplot(aes(x = Gender, fill = factor(Survived, labels = c("Died", "Survied")))) + 
+  geom_bar(position = "dodge") + 
+  scale_fill_brewer(palette = "Set1") +
+  labs(title = "Survival rate with respect to Gender",   caption = "Data Source: titanic.csv", x = "Gender", y = "No. of people
+       on Titanic", fill = "Survival Status") +
+  coord_flip() + 
+  facet_wrap(Survived ~.,labeller = as_labeller(S.labs)) +
+  theme_bw() +  
+  theme(plot.title = element_text(face="bold",color = "Brown"))
+
+#Observation: from the graph we can see that the death rate is way to high in Male when compared to Female, and the Survival rate is high in Female than Male.
+#So, we could conclude that there is a relationship between survival and gender.
+
+```
+
+#relationship between survival and class?
+```{r}
+
+#to add Titles to the strips
+S.labs <- c('0' = "Died", '1' = "Survied")
+
+#Plotting the bar graph using ggplot
+#Used coord_flip for better comparison and Visualization 
+titanic %>% ggplot(aes(x = PClass, fill = factor(Survived, labels = c("Died", "Survied")))) + 
+  geom_bar(position = "dodge") + 
+  scale_fill_brewer(palette = "Set1") +
+  labs(y = "No. of people on Titanic", fill = "Survival Status", x = "Class levels", title = "Survival rate with respect to Titanic Classes", caption = "Data Source: titanic.csv" ) +
+  facet_wrap(Survived ~.,labeller = as_labeller(S.labs)) +
+  theme_bw() +  
+  coord_flip() + 
+  theme(plot.title = element_text(face="bold",color = "Brown"))
+
+#Observation:The death rate is trending downwards through the lower class to higher class, where as in the survival case, the first class high rate when compared with others. We could clearly say that there is a relationship between death cases with respect to class.  
+
+```
+
+# Is there a relationship between survival and marital status for females? What about males? If there isn't enough data to answer a question, state so and explain.
+```{r}
+
+#Plotting the bar graph using ggplot
+#Dropped the NA values
+#Removed facet_wrap for better comparison
+#Using titanic_new directly as Male marital status is NA
+titanic_new %>% drop_na(Marital_status,Survived) %>% ggplot(aes(x = Marital_status, fill = factor(Survived, labels = c("Died", "Survied")))) + 
+  geom_bar(position = "stack") + 
+  scale_fill_brewer(palette = "Set1") +
+  labs(title = "Survival rate with respect to Female Marital status",   caption = "Data Source: titanic.csv", x = "Marital status in Female", y = "No. of people", fill = "Survival Status") +
+  theme_bw() +  
+  theme(plot.title = element_text(face="bold",color = "Brown"))
+
+#Observation1: Survival rate is not dependent on the marital status as we could see same count for married and unmarried women where as unmarried women died more than the married women.
+
+#Observation2: In case of Males, through the titles we could not segregate the Marital status as any man whose age is above 18 years is just refered as Mr. So, no enough information to deduce the relationship. 
+
+
+library(rpart)
+library(rpart.plot)
+
+View(Decision_tree)
+rpart.plot(Decision_tree)
