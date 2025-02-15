@@ -1,0 +1,86 @@
+---
+title: "AKHIL R MARKDOWN 1"
+output:
+  word_document: default
+  pdf_document: default
+date: "2023-01-26"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r
+Naming the four suits by making Suits.
+suits <- c('spades', 'clubs', 'diamonds', 'hearts')
+#faces by listing out all 13.
+faces <- c('king', 'queen', 'jack', 'ten', 'nine', 'eight', 'seven', 'six', 'five', 'four', 'three', 'two', 'ace')
+#Faces can be duplicated by listing all 13 of them.
+face <- rep(faces, 4)
+#Card values are determined by listing the values and then duplicating that number four times.
+value <- rep(13:1, 4)
+#Combining the three lists to create the decl using data.frame
+deck <- data.frame(faces, suits, value)
+#to Know top part of the deck table
+head(deck)
+#to Know Bottom(tail) part of the deck table
+tail(deck)
+#to Know Dimention of the deck table
+dim(deck)
+#to Know type of the deck table
+typeof(deck)
+@#Return the value of deck in the first row and column.
+deck[1,1]
+deck[1,1:3]
+#selection using logical values
+deck[5,c(TRUE,FALSE,TRUE)]
+deck[5, c(TRUE,TRUE,FALSE)]
+#deal function created to deal out random cards (rows) from the deck without replacing those cards in the deck during the random sample procedure
+deal <- function(cards) { 
+  cards[1,]
+}
+#In order to shuffle the cards in the deck created the shuffle function and choose the values.
+shuffle <- function(cards) {
+  random <- sample(1:52, 52)
+  cards[random,]
+}
+ the shuffle function
+shuffle(deck)
+#retrieving suit column values
+deck$suits
+deck$faces
+#retrieving Value column values
+deck$value
+#moving to other object
+deck2<-deck
+#Creating new column with values
+deck2$new <- 1:52
+head(deck2)
+#using Spades instead of Spades
+deck2$suit[deck2$suit == "spades"] <- "Spades"
+#to extract the "diamonds" set from the deck
+deck2[deck2$suit == "diamonds", ]
+#Queens from all sets are being assembled.
+deck2[deck2$face == "queen", ]
+#Only queens from clubs and gems are being gathered.
+deck2[(deck2$face == "queen" & deck2$suit == "clubs") | (deck2$face == "queen" & deck2$suit == "diamonds"), ]
+deck2
+
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
