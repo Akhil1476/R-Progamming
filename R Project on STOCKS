@@ -1,0 +1,257 @@
+---
+title: "FINAL PROJECT- AKHIL"
+output:
+  word_document: default
+  html_document: default
+date: "2023-05-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+#Installing the packages
+install.packages('dplyr' , repos = "http://cran.us.r-project.org")
+install.packages('DataExplorer' , repos = "http://cran.us.r-project.org")
+install.packages('ggplot2', repos = "http://cran.us.r-project.org")
+install.packages('tidyverse' , repos = "http://cran.us.r-project.org")
+
+#loading the Libraries
+library(ggplot2)
+library(DataExplorer)
+library(dplyr)
+library(tidyverse)
+
+#to read the .cvs file
+my_stocks <- read_csv("stocks.csv")
+
+#To know the structure of the data that is data variables, datatypes with sample observations
+
+str(my_stocks)
+
+#To know the dimentions of the data that is number of rows and number of columns
+dim(my_stocks)
+
+missing(my_stocks)
+           
+#To view the data in table format
+print(my_stocks,n=100)
+view(my_stocks, n=100)
+View(my_stocks)
+
+#To explore for numeric attributes by understanding  minimum value, 1st quartile, median, mean, 3rd quartile and maximum values 
+summary(my_stocks)
+
+# Use Summary if you want data frame for one variable
+my_stocks %>%
+  select(stock_price_open) %>%  
+  summary()
+
+my_stocks %>%
+  select(stock_price_close) %>%  
+  summary()
+
+my_stocks %>%
+  select(stock_price_high) %>%  
+  summary()
+
+my_stocks %>%
+  select(stock_price_low) %>%  
+  summary()
+
+my_stocks %>%
+  select(stock_price_open) %>%  
+  summary()
+
+my_stocks %>%
+  select(stock_price_adj_close) %>%  
+  summary()
+
+#To easy preview data type and sample data, similar to structure
+glimpse(my_stocks)
+
+#usage of as.factor to identify no. of levels by converting it into categorical datatype
+str(my_stocks$new_stock_symbol <- as.factor(my_stocks$stock_symbol))
+
+#using mutate function to perform column operations and create temporary variable Gain to showcase the result.
+mutate(my_stocks, "Gain" = stock_price_adj_close - stock_price_open) %>% slice_max(Gain) %>% select(stock_symbol,date,Gain)
+
+#using transmute - it gives only the value of the gain
+print(transmute(my_stocks, "Gain_in_a_day" = stock_price_adj_close - stock_price_open) %>% slice(which.max(Gain_in_a_day)))
+
+#Which stock had the highest single loss in a day, which day was it 
+
+#using mutate function to perform column operations and create temporary variable Loss to showcase the result.
+mutate(my_stocks, "Loss" = stock_price_adj_close - stock_price_open) %>% slice_min(Loss) %>% select(stock_symbol,date,Loss)
+
+
+#Create a plot of closing price for XOM over time 
+#to covert to date format to Date from character
+my_stocks$date<-as.Date(my_stocks$date)
+
+#Create a subset for XOM stock
+newdata_XOM <- subset(my_stocks,stock_symbol == "XOM")
+# to know if the datatype as proper before plotting the data
+str(newdata_XOM )
+
+# To plot using ggplot and assigning the graph format with aesthetic mappings and themes
+ggplot(newdata_XOM , aes(x = date, y = stock_price_close, label=stock_price_close)) +
+  geom_line(colour="blue", linetype="solid") + 
+  labs(title = "A plot of closing price for XOM Stock over time", 
+       caption = "- Generated through R", x="Timeline", y="XOM Stock Close Price") +
+  geom_text(data=subset(newdata_XOM , stock_price_close > 109 | stock_price_close <= 25)) +
+  theme(plot.title = element_text(face="bold", size = 18, color = "Brown"))
+
+# Create a plot of closing price for XKK over time
+
+#Create a subset for XKK stock
+newdata_XKK <- subset(my_stocks,stock_symbol == "XKK")
+
+# To plot using ggplot and assigning the graph format with aesthetic mappings and themes
+ggplot(newdata_XKK , aes(x = date, y = stock_price_close, label=stock_price_close)) +
+  geom_line(colour="blue", linetype="solid") + 
+  labs(title = "A plot of closing price for XKK Stock over time", 
+       caption = "- Generated through R", x="Timeline", y="XKK Stock Close Price") +
+  geom_text(data=subset(newdata_XKK , stock_price_close > 11 | stock_price_close <= 3)) +
+  theme(plot.title = element_text(face="bold", size = 18, color = "Brown"))
+
+# Create a plot of the change in price per day for both XOM and XKK 
+#tidy the data
+comparison <- filter(my_stocks, stock_symbol %in% c("XOM", "XKK"),date >= as.Date("2003-10-09")) %>% mutate("Change_in_price" = stock_price_adj_close - stock_price_open) %>% select(stock_symbol,Change_in_price, date)
+#checking the datatypes
+str(comparison)
+
+comparison_whole <- filter(my_stocks, stock_symbol %in% c("XOM", "XKK")) %>% mutate("Change_in_price" = stock_price_adj_close - stock_price_open) %>% select(stock_symbol,Change_in_price, date) 
+
+#plotting multiple lines graph using following fuctions
+ggplot(data = comparison,aes(x = date, y = Change_in_price, 
+                             group = stock_symbol, color =stock_symbol)) + 
+  geom_line() +
+  labs(title = "Price change for XOM and XKK indetail", 
+       caption = "- Generated through R", x="Timeline", y= "Change in Price in a day") +
+  theme(plot.title = element_text(face="bold", size = 18, color = "Brown"))
+
+#for whole data
+comparison_whole <- filter(my_stocks, stock_symbol %in% c("XOM", "XKK")) %>% mutate("Change_in_price" = stock_price_adj_close - stock_price_open) %>% select(stock_symbol,Change_in_price, date)         
+str(comparison_whole)
+
+ggplot(data = comparison_whole,aes(x = date, y = Change_in_price, 
+                                   group = stock_symbol, color =stock_symbol)) + 
+  geom_line() +
+  labs(title = "Price change for XOM and XKK", 
+       caption = "- For complete period", x="Timeline", y= "Change in Price in a day") +
+  theme(plot.title = element_text(face="bold", size = 18, color = "Brown"))
+
+#loading the packages
+library(rpart)
+
+library(rpart.plot)
+
+# Create a decision tree model
+Decision_tree<-rpart(stock_price_close ~ stock_symbol+stock_price_open+stock_price_high+stock_price_low, data=newdata_XKK, method="class")
+
+
+View(Decision_tree)
+
+# Plot the decision tree
+
+rpart.plot(Decision_tree)
+
+
+#create time close plot using ts.plot
+library(quantmod)
+
+#create value close to get plotting between time and close
+close<-newdata_XKK$stock_price_open
+
+#find the mean of comparision values for change in price
+mean(close)
+
+#plot the change in price graph using ts.plot funtion
+ts.plot(close)
+
+#create value close to get plotting between time and close
+close<-newdata_XKK$stock_price_close
+
+#plot the change in price graph using ts.plot funtion
+ts.plot(close)
+
+#create a simple line plot of the stock prices in the my_stocks data frame
+plot(my_stocks)
+
+#create an interactive candlestick chart of the stock prices in the my_stocks data frame
+chartSeries(my_stocks)
+
+#loading the package
+library(caret)
+
+# Split the data into training and testing sets
+
+index <- createDataPartition(my_stocks$stock_price_close, p = 0.7, list = FALSE)
+
+train <- my_stocks[index, ]
+test <- my_stocks[-index, ]
+
+# Build the linear regression model
+
+model <- train(stock_price_close~stock_symbol , data = test, method = "lm")
+
+fit <- predict(model, newdata = train)
+
+# Evaluate the model on the test data
+
+pred <- predict(model, newdata = test)
+accuracy <- mean((test$stock_price_close - pred)^2)
+
+# Fine-tune the model
+
+tuned_model <- train(stock_price_close ~ stock_symbol, data = train, method = "lm", tuneLength = 10)
+
+# Print the model summary and evaluation results
+
+summary(tuned_model)
+print(tuned_model)  
+
+library(ggplot2)
+
+# Plot the data and the linear regression line
+
+ggplot(train, aes(stock_price_close, stock_symbol)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
+
+#To produce an html file with the basic statistics, structure, missing data, distribution visualizations, correlation matrix and principal component analysis for your data frame
+("The complete picture of the data in the form of a report.It gives Basic Statistics,Raw Counts,Percentages, Data Structure, Missing Data Profile, Univariate Distribution, Histogram, Bar Chart (with frequency), QQ Plot, Correlation Analysis,Principal Component Analysis.This function is defined under DataExplorer library")
+
+DataExplorer::create_report(my_stocks)
+
+
+##Observation1: closing price of stock XKK is depending on the opening price but closing price of stock XOM is not depending on the opening price.
+
+#Observation2: In case of XOM, through the closing price is high the rate of return in case of XKK is high comapared in XOM.
+
+
+
+
+
+
+
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
