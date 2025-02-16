@@ -1,0 +1,143 @@
+---
+title: "Project 3"
+output:
+  word_document: default
+  pdf_document: default
+date: "2023-02-20"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+library(readr)
+
+df_1 <- read_csv("C:/Users/PC/Downloads/US_state_data.CSV.csv")
+
+View(df_1)
+
+head(df_1)
+
+df_2<-read.csv("C:/Users/PC/OneDrive/Desktop/581/Project 3/Lower_48_politics.CSV")
+
+names(df_1)
+
+names(df_2)
+
+library(dplyr)
+
+df_3<-left_join(df_1,df_2, by=c("State"="state","state_code"="state_code"))
+
+#Objects exported from other packages
+
+?as_tibble
+#Importing documents from computer to R studio using as_tibble
+
+(df_art <- import("C:/Users/PC/Downloads/art.csv") %>% as_tibble())
+#
+?merge
+#combining two data frames to get art data
+
+df<-merge(df_3,df_art,by="State")
+
+df <- df[, c(-9:-17)]
+
+#Importing documents from computer to R studio using as_tibble
+
+(df_Facebook <- import("C:/Users/PC/Downloads/Facebook.csv") %>% as_tibble())
+
+#combining two data frames to get Facebook data
+
+df<-merge(df,df_Facebook,by="State")
+
+#Importing documents from computer to R studio using as_tibble
+
+(df_ENTP <- import("C:/Users/PC/Downloads/ENTP.csv") %>% as_tibble())
+
+#combining two data entrepreneurship to get art data
+
+df<-merge(df,df_ENTP,by="State")
+
+#Importing documents from computer to R studio using as_tibble
+
+(df_Privacy <- import("C:/Users/PC/Downloads/Privacy.csv") %>% as_tibble())
+
+#combining two data frames to get Privacy data
+
+df<-merge(df,df_Privacy,by="State")
+
+#Importing documents from computer to R studio using as_tibble
+
+(df_Instagram <- import("C:/Users/PC/Downloads/Instagram.csv") %>% as_tibble())
+
+#combining two data frames to get Instagram data
+
+df<-merge(df,df_Instagram,by="State")
+
+#Importing documents from computer to R studio using as_tibble
+
+(df_twitter <- import("C:/Users/PC/Downloads/twitter.csv") %>% as_tibble())
+
+#combining two data frames to get Twitter data
+
+df<-merge(df,df_twitter,by="State")
+
+#Importing documents from computer to R studio using as_tibble
+
+(df_gdpr <- import("C:/Users/PC/Downloads/gdpr.csv") %>% as_tibble())
+
+#combining two data frames to get GDPR data
+
+df<-merge(df,df_gdpr,by="State")
+
+#Importing documents from computer to R studio using as_tibble
+
+(df_loans <- import("C:/Users/PC/Downloads/loans.csv") %>% as_tibble())
+
+#combining two data frames to get Loans data
+
+df<-merge(df,df_loans,by="State")
+
+#Importing documents from computer to R studio using as_tibble
+
+(df_university <- import("C:/Users/PC/Downloads/university.csv") %>% as_tibble())
+
+#combining two data frames to get University data
+
+df<-merge(df,df_university,by="State")
+
+#Function to standardize data in between 0 to 1
+
+min_max_norm <- function(x) {(x - min(x)) / (max(x) - min(x))}
+
+#Now apply this formula to the Df data field.
+
+df_norm<-as.data.frame(lapply(df[11:19],min_max_norm))
+
+df_norm
+
+#The columns which did not have numerical values were removed.We can add them back by following the steps below - 
+
+df_norm
+
+
